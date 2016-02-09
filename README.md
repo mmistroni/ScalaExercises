@@ -89,3 +89,63 @@ class CodeEvalSuite{
   
   
 }
+
+
+
+import org.junit._
+
+import Assert._
+import Baristax._
+import akka.actor.ActorSystem
+import akka.actor.Actor
+import akka.actor.Props
+import akka.testkit.{TestKit, TestActorRef, ImplicitSender}
+import scala.concurrent.duration._
+import scala.concurrent.Await
+import akka.pattern.ask
+import akka.util.Timeout
+
+class SimpleTest extends TestKit(ActorSystem("testSystem")) with ImplicitSender{
+
+  
+  @Test @Ignore def testDownloaderSynchronously(){
+    
+    val downloader = TestActorRef[Downloader]
+  
+    implicit val timeout = Timeout(5 seconds)                                                      
+    val future =  downloader ? DownloadFile("Foo")
+    
+    val result = Await.result(future, 1 second)
+    assertEquals(FileContent("|CIX23|20911|4|COMPANY DATA|EDGAR/data/files"), result)
+    
+  
+  }
+    /**
+    val retriever = TestActorRef(Props(classOf[IndexRetriever], downloader))
+    val sink = TestActorRef[EdgarFileSink]
+    val sink2 = system.actorOf(Props[EdgarFileSink])
+    val fileManager = TestActorRef(Props(classOf[EdgarFileManager], downloader, sink))
+    val processor = TestActorRef(Props(classOf[IndexProcessor], fileManager))
+    val master = TestActorRef(Props(classOf[EdgarMaster], retriever, processor,
+                                                          fileManager))
+    **/
+    
+  @Test def testDownloaderAsync(){
+    
+    val downloader = TestActorRef[Downloader]
+  
+    within (1000 millis) {
+      downloader ! DownloadFile("Test")
+      expectMsg(FileContent("|CIX23|20911|4|COMPANY DATA|EDGAR/data/files"))
+    }
+  
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+}
