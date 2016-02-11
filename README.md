@@ -224,7 +224,24 @@ class SimpleTest extends TestKit(ActorSystem("testSystem")) with ImplicitSender{
     
   }
   
+  @Test def testRetrieverWithProbe(){
+    
+    val expectedFinalMsg = FileContent("|CIX23|20911|4|COMPANY DATA|EDGAR/data/files")
+    
+    val downloaderProbe = TestProbe() //TestActorRef[Downloader]
+    
+    
+    val retriever = TestActorRef(Props(classOf[IndexRetriever], downloaderProbe.ref))
   
+    within (1000 millis) {
+      retriever ! DownloadLatestIndex 
+      downloaderProbe.expectMsg(1000 millis,DownloadFile("master-idx.txt"))
+      downloaderProbe.reply(expectedFinalMsg)
+    
+      expectMsg(expectedFinalMsg)
+    }
+  
+  }
   
   
   
