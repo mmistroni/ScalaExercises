@@ -243,6 +243,12 @@ class SimpleTest extends TestKit(ActorSystem("testSystem")) with ImplicitSender{
   
   }
   
+  case class User(var firstName: String, var lastName: String, var city: String)
+
+
+object UserPredicates {
+    def lastNameEquals(value: String)(user: User) = user.lastName == value
+  }
   
   
   
